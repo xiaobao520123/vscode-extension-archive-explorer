@@ -3,7 +3,6 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as mkdirp from 'mkdirp';
 import * as rimraf from 'rimraf';
-import * as zip from 'zlib';
 
 //#region Utilities
 
@@ -291,18 +290,18 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 	getTreeItem(element: Entry): vscode.TreeItem {
 		const treeItem = new vscode.TreeItem(element.uri, element.type === vscode.FileType.Directory ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
 		if (element.type === vscode.FileType.File) {
-			treeItem.command = { command: 'fileExplorer.openFile', title: "Open File", arguments: [element.uri], };
+			treeItem.command = { command: 'archiveExplorer.openFile', title: "Open File", arguments: [element.uri], };
 			treeItem.contextValue = 'file';
 		}
 		return treeItem;
 	}
 }
 
-export class FileExplorer {
+export class ArchiveExplorer {
 	constructor(context: vscode.ExtensionContext) {
 		const treeDataProvider = new FileSystemProvider();
-		context.subscriptions.push(vscode.window.createTreeView('fileExplorer', { treeDataProvider }));
-		vscode.commands.registerCommand('fileExplorer.openFile', (resource) => this.openResource(resource));
+		context.subscriptions.push(vscode.window.createTreeView('archiveExplorer', { treeDataProvider }));
+		vscode.commands.registerCommand('archiveExplorer.openFile', (resource) => this.openResource(resource));
 	}
 
 	private openResource(resource: vscode.Uri): void {
