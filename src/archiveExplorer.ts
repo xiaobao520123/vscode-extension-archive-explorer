@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as mkdirp from 'mkdirp';
 import * as rimraf from 'rimraf';
+import * as archive from 'libarchive.js';
 
 //#region Utilities
 
@@ -305,6 +306,6 @@ export class ArchiveExplorer {
 	}
 
 	private openResource(resource: vscode.Uri): void {
-		vscode.window.showTextDocument(resource);
+		// vscode.window.showTextDocument(resource);
 	}
 }

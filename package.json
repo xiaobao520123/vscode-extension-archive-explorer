@@ -23,42 +23,21 @@
 	"main": "./out/extension.js",
 	"contributes": {
 		"viewsContainers": {
-			"activitybar": [
-			]
+			"activitybar": []
 		},
 		"views": {
 			"explorer": [
-				{
-					"id": "fileExplorer",
-					"name": "File Explorer"
-				},
 				{
 					"id": "archiveExplorer",
 					"name": "Archive Explorer"
 				}
 			]
 		},
-		"commands": [
-			{
-				"command": "fileExplorer.refreshFile",
-				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.svg",
-					"dark": "resources/dark/refresh.svg"
-				}
-			},
-			{
-				"command": "fileExplorer.openFile",
-				"title": "Open File"
-			}
-		],
+		"commands": [],
 		"menus": {
-			"commandPalette": [
-			],
-			"view/title": [
-			],
-			"view/item/context": [
-			]
+			"commandPalette": [],
+			"view/title": [],
+			"view/item/context": []
 		},
 		"configuration": [
 			{
@@ -90,11 +69,8 @@
 		"typescript": "^5.4.2"
 	},
 	"dependencies": {
-		"ftp": "^0.3.10",
-		"install": "^0.13.0",
-		"jsonc-parser": "^0.4.2",
 		"libarchive.js": "^2.0.2",
-		"minimist": "^1.2.6",
+		"minimist": "^1.2.8",
 		"mkdirp": "^0.5.1",
 		"rimraf": "^2.6.2"
 	}
