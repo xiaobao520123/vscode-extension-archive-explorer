@@ -1,12 +1,18 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as mkdirp from 'mkdirp';
-import * as rimraf from 'rimraf';
-import * as archive from 'libarchive.js';
+import { Archive } from 'libarchive.js';
+import { Worker } from 'worker_threads';
+
+Archive.init({
+	getWorker: function GetWorker(): Worker {
+		const worker = new Worker('./node_modules/libarchive.js/dist/worker-bundle.js');
+		return worker;
+	},
+	workerUrl: './node_modules/libarchive.js/dist/worker-bundle.js'
+});
 
 //#region Utilities
-
 namespace _ {
 
 	function handleResult<T>(resolve: (result: T) => void, reject: (error: Error) => void, error: Error | null | undefined, result: T): void {
@@ -84,18 +90,6 @@ namespace _ {
 	export function exists(path: string): Promise<boolean> {
 		return new Promise<boolean>((resolve, reject) => {
 			fs.exists(path, exists => handleResult(resolve, reject, null, exists));
-		});
-	}
-
-	export function rmrf(path: string): Promise<void> {
-		return new Promise<void>((resolve, reject) => {
-			rimraf(path, error => handleResult(resolve, reject, error, void 0));
-		});
-	}
-
-	export function mkdir(path: string): Promise<void> {
-		return new Promise<void>((resolve, reject) => {
-			mkdirp(path, error => handleResult(resolve, reject, error, void 0));
 		});
 	}
 
@@ -207,7 +201,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 	}
 
 	createDirectory(uri: vscode.Uri): void | Thenable<void> {
-		return _.mkdir(uri.fsPath);
+		//return _.mkdir(uri.fsPath);
 	}
 
 	readFile(uri: vscode.Uri): Uint8Array | Thenable<Uint8Array> {
@@ -225,7 +219,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 				throw vscode.FileSystemError.FileNotFound();
 			}
 
-			await _.mkdir(path.dirname(uri.fsPath));
+			//await _.mkdir(path.dirname(uri.fsPath));
 		} else {
 			if (!options.overwrite) {
 				throw vscode.FileSystemError.FileExists();
@@ -237,7 +231,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 
 	delete(uri: vscode.Uri, options: { recursive: boolean; }): void | Thenable<void> {
 		if (options.recursive) {
-			return _.rmrf(uri.fsPath);
+			//return _.rmrf(uri.fsPath);
 		}
 
 		return _.unlink(uri.fsPath);
@@ -253,16 +247,30 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 			if (!options.overwrite) {
 				throw vscode.FileSystemError.FileExists();
 			} else {
-				await _.rmrf(newUri.fsPath);
+				// await _.rmrf(newUri.fsPath);
 			}
 		}
 
 		const parentExists = await _.exists(path.dirname(newUri.fsPath));
 		if (!parentExists) {
-			await _.mkdir(path.dirname(newUri.fsPath));
+			// await _.mkdir(path.dirname(newUri.fsPath));
 		}
 
 		return _.rename(oldUri.fsPath, newUri.fsPath);
+	}
+
+	readArchive(uri: vscode.Uri) {
+		return this._readArchive(uri);
+	}
+
+	async _readArchive(uri: vscode.Uri) {
+		const arr = await this.readFile(uri);
+		const blob = new Blob([arr]);
+
+		const file = new File([blob], uri.fsPath);
+		const archive = await Archive.open(file);
+		const obj = await archive.getFilesObject();
+		console.log('objects: ', obj);
 	}
 
 	// tree data provider
@@ -272,6 +280,9 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 			const children = await this.readDirectory(element.uri);
 			return children.map(([name, type]) => ({ uri: vscode.Uri.file(path.join(element.uri.fsPath, name)), type }));
 		}
+
+		const zipFile = vscode.Uri.parse("file:///Users/xiaobao/Desktop/onlyID.zip");
+		const children = await this.readArchive(zipFile);
 
 		const workspaceFolder = (vscode.workspace.workspaceFolders ?? []).filter(folder => folder.uri.scheme === 'file')[0];
 		if (workspaceFolder) {
