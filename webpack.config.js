@@ -23,16 +23,21 @@ module.exports = {
       {
         test: /\.ts$/,
         exclude: /node_modules/,
-        use: 'ts-loader'
-      }
+        use: { loader: 'ts-loader' }
+      },
+      {
+        test: /\.worker\.ts$/,
+        use: { loader: 'worker-loader' },
+        exclude: /node_modules/
+      },
     ]
   },
   plugins: [
     new CopyPlugin({
       patterns: [
         {
-          from: "node_modules/libarchive.js/dist/libarchive.wasm",
-          to: "libarchive.asm",
+          from: "node_modules/@magnetardev/archive/dist/archive.wasm",
+          to: "archive.asm",
         }
       ]
     })

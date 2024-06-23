@@ -1,16 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { Archive } from 'libarchive.js';
-import { Worker } from 'worker_threads';
-
-Archive.init({
-	getWorker: function GetWorker(): Worker {
-		const worker = new Worker('./node_modules/libarchive.js/dist/worker-bundle.js');
-		return worker;
-	},
-	workerUrl: './node_modules/libarchive.js/dist/worker-bundle.js'
-});
+import * as archive from '@magnetardev/archive';
 
 //#region Utilities
 namespace _ {
@@ -268,9 +259,8 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 		const blob = new Blob([arr]);
 
 		const file = new File([blob], uri.fsPath);
-		const archive = await Archive.open(file);
-		const obj = await archive.getFilesObject();
-		console.log('objects: ', obj);
+		const ar = await archive.createReader(arr);
+		console.log('entries length: ', ar.entries.length);
 	}
 
 	// tree data provider
